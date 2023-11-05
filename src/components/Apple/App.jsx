@@ -1,0 +1,120 @@
+import { Line } from "react-chartjs-2";
+import { Chart as Chartjs , CategoryScale, LinearScale, LineElement, Title, Tooltip, Legend, PointElement } from "chart.js";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import formatDate from "../util/fromateDate";
+import Loader from "../util/Loader";
+
+Chartjs.register(CategoryScale, LinearScale,  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend);
+
+function App() {
+let apikey= import.meta.env.VITE_apikey
+
+  const[chart,setchart]=useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'My First Dataset',
+        data: [],
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1,
+      },
+    ],
+  })
+const[high,sethigh]=useState([])
+const [loading,setLoading]=useState(true)
+
+const url  =`https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/month/2023-01-09/2023-10-09?adjusted=true&sort=asc&limit=1219&apiKey=${apikey}`
+
+useEffect(()=>{
+
+ axios.get(url)
+  .then((response)=>{
+    const alldata= response.data;
+
+   const highprice= alldata?.results?.map((hp)=> hp.h)
+   const Highest= Math.max(...highprice)
+sethigh(Highest)
+    if (alldata || Array.isArray(alldata)) {
+    
+   
+      const fulldata = {
+        labels : alldata?.results?.map((t)=> formatDate(t.t)),
+        datasets: [{
+            label: 'The close price',
+            data: alldata?.results?.map((t) => t.c),
+            fill: false,
+            borderColor: 'rgb(0, 166, 251)',
+            tension: 0.1
+          },
+        {
+            label: 'The high price',
+            data: alldata?.results?.map((t) => t.h ),
+            fill: false,
+            borderColor: 'rgb(46, 196, 182)',
+            tension: 0.1
+          },
+        
+        {
+            label: 'The low price',
+            data: alldata?.results?.map((t) => t.l ),
+            fill: false,
+            borderColor: 'rgb(239, 35, 60)',
+            tension: 0.1
+          },
+        
+        ]
+        }
+  
+  setchart(fulldata)
+setLoading(false)
+    } else {
+      console.log("no api here");
+    }
+   
+
+
+  })
+  .catch((error)=>{
+     console.log(error);
+  })
+
+
+},[url])
+
+ 
+
+
+
+
+
+  // Chart options
+  const options = {
+    maintainAspectRatio: false,
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+     
+    },
+  };
+
+  return (
+    <div className="   pt-5">
+      <div>Apple.INC </div>
+   <p className="text-5xl font-bold uppercase">{high} </p>
+     <div className="max-w-full  h-80">
+     { loading ? <Loader></Loader> :<Line options={options} data={chart}/>}
+     </div>
+     
+    </div>
+  );
+}
+
+export default App;
