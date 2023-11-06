@@ -3,7 +3,7 @@ import { Chart as Chartjs , CategoryScale, LinearScale, LineElement, Title, Tool
 import { useEffect, useState } from "react";
 import axios from "axios";
 import formatDate from "../util/fromateDate";
-import Loader from "../util/Loader";
+import Loading from "../util/Loading";
 
 Chartjs.register(CategoryScale, LinearScale,  PointElement,
   LineElement,
@@ -109,7 +109,7 @@ Chartjs.register(CategoryScale, LinearScale,  PointElement,
       <div>Amazon.com Inc </div>
    <p className="text-5xl font-bold uppercase">{high} </p>
      <div className=" h-80">
-    { loading ? <Loader/>:<Line options={options} data={chart}/>}
+    { loading ? <Loading/>:<Line options={options} data={chart}/>}
      </div>
      
     </div>
